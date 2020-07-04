@@ -45,6 +45,7 @@ import Carousel from "./IndexSections/Carousel.js";
 import Icons from "./IndexSections/Icons.js";
 import Login from "./IndexSections/Login.js";
 import Download from "./IndexSections/Download.js";
+import ImageSlider from "../components/image_slider/ImageSlider";
 
 class Index extends React.Component {
   componentDidMount() {
@@ -57,7 +58,7 @@ class Index extends React.Component {
       <>
         <DemoNavbar />
         <main ref="main">
-          <Hero />
+          <Hero></Hero>
           <Buttons />
           <Inputs />
           <section className="section">

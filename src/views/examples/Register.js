@@ -31,7 +31,7 @@ import {
   InputGroup,
   Container,
   Row,
-  Col
+  Col,
 } from "reactstrap";
 
 // core components
@@ -50,15 +50,17 @@ class Register extends React.Component {
         <DemoNavbar />
         <main ref="main">
           <section className="section section-shaped section-lg">
-            <div className="shape shape-style-1 bg-gradient-default">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
+            <div className="shape shape-style-1 shape-primary">
+              <span className="span-150" />
+              <span className="span-50" />
+              <span className="span-50" />
+              <span className="span-75" />
+              <span className="span-100" />
+              <span className="span-75" />
+              <span className="span-50" />
+              <span className="span-100" />
+              <span className="span-50" />
+              <span className="span-100" />
             </div>
             <Container className="pt-lg-7">
               <Row className="justify-content-center">
@@ -73,7 +75,7 @@ class Register extends React.Component {
                           className="btn-neutral btn-icon mr-4"
                           color="default"
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                         >
                           <span className="btn-inner--icon mr-1">
                             <img
@@ -87,7 +89,7 @@ class Register extends React.Component {
                           className="btn-neutral btn-icon ml-1"
                           color="default"
                           href="#pablo"
-                          onClick={e => e.preventDefault()}
+                          onClick={(e) => e.preventDefault()}
                         >
                           <span className="btn-inner--icon mr-1">
                             <img
@@ -162,7 +164,7 @@ class Register extends React.Component {
                                   I agree with the{" "}
                                   <a
                                     href="#pablo"
-                                    onClick={e => e.preventDefault()}
+                                    onClick={(e) => e.preventDefault()}
                                   >
                                     Privacy Policy
                                   </a>
