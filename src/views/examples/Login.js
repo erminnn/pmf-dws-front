@@ -40,7 +40,23 @@ import DemoNavbar from "components/Navbars/DemoNavbar.js";
 import SimpleFooter from "components/Footers/SimpleFooter.js";
 
 class Login extends React.Component {
+  state = {
+    username: "",
+    password: "",
+  };
+
+  handleSubmit = (event) => {
+    console.log(this.state);
+
+    event.preventDefault();
+  };
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
+  };
   render() {
+    const { username, password } = this.state;
     return (
       <>
         <DemoNavbar />
@@ -68,28 +84,37 @@ class Login extends React.Component {
                       </div>
                     </CardHeader>
                     <CardBody className="px-lg-5 py-lg-5">
-                      <Form role="form">
-                        <FormGroup className="mb-3">
-                          <InputGroup className="input-group-alternative">
+                      <Form role="form" onSubmit={this.handleSubmit}>
+                        <FormGroup>
+                          <InputGroup className="input-group-alternative mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText>
-                                <i className="ni ni-email-83" />
+                                <i className="ni ni-hat-3" />
                               </InputGroupText>
                             </InputGroupAddon>
-                            <Input placeholder="Email" type="email" />
+                            <Input
+                              placeholder="Username"
+                              type="text"
+                              name="username"
+                              onChange={this.handleChange}
+                              value={username}
+                            />
                           </InputGroup>
                         </FormGroup>
                         <FormGroup>
-                          <InputGroup className="input-group-alternative">
+                          <InputGroup className="input-group-alternative mb-3">
                             <InputGroupAddon addonType="prepend">
                               <InputGroupText>
                                 <i className="ni ni-lock-circle-open" />
                               </InputGroupText>
                             </InputGroupAddon>
                             <Input
-                              placeholder="Password"
+                              placeholder="
+                              Password"
                               type="password"
-                              autoComplete="off"
+                              name="password"
+                              onChange={this.handleChange}
+                              value={password}
                             />
                           </InputGroup>
                         </FormGroup>
@@ -98,7 +123,7 @@ class Login extends React.Component {
                           <Button
                             className="my-4"
                             color="primary"
-                            type="button"
+                            type="submit"
                           >
                             Sign in
                           </Button>
