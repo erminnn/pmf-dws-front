@@ -14,6 +14,14 @@ import {
 } from "reactstrap";
 
 class DemoNavbar extends React.Component {
+  isAuthenticated = () => {
+    return "username" in localStorage;
+  };
+  logout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
+
   render() {
     return (
       <>
@@ -51,21 +59,31 @@ class DemoNavbar extends React.Component {
                   </Row>
                 </div>
                 <Nav className="ml-auto" navbar>
-                  <NavItem>
-                    <NavLink to="/profile-page" tag={Link}>
-                      Profile
-                    </NavLink>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink to="/login" tag={Link}>
-                      Login
-                    </NavLink>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink to="/register" tag={Link}>
-                      Register
-                    </NavLink>
-                  </NavItem>
+                  {this.isAuthenticated() ? (
+                    <>
+                      <NavItem>
+                        <NavLink to="/profile-page" tag={Link}>
+                          Profile
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
+                        <NavLink onClick={this.logout}>Logout</NavLink>
+                      </NavItem>
+                    </>
+                  ) : (
+                    <>
+                      <NavItem>
+                        <NavLink to="/login" tag={Link}>
+                          Login
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
+                        <NavLink to="/register" tag={Link}>
+                          Register
+                        </NavLink>
+                      </NavItem>
+                    </>
+                  )}
                 </Nav>
               </UncontrolledCollapse>
             </Container>
@@ -77,56 +95,3 @@ class DemoNavbar extends React.Component {
 }
 
 export default DemoNavbar;
-
-/*
-<Container>
-                <NavbarBrand className="mr-lg-5" to="/" tag={Link}>
-                <img
-                  alt="..."
-                  src={require("./logo.png")}
-                  style={{ width: "150px", height: "65px" }}
-                />
-              </NavbarBrand>
-              <button className="navbar-toggler" id="navbar-info">
-                <span className="navbar-toggler-icon" />
-              </button>
-              <UncontrolledCollapse navbar toggler="#navbar-info">
-                <div className="navbar-collapse-header">
-                 <Row>
-                    <Col className="collapse-brand" xs="6">
-                      <Link to="/">
-                        <img
-                          alt="..."
-                          src={require("./logo.png")}
-                          style={{ width: "80px", height: "80px" }}
-                        />
-                      </Link>
-                    </Col>
-                    <Col className="collapse-close" xs="6">
-                      <button className="navbar-toggler" id="navbar_global">
-                        <span />
-                        <span />
-                      </button>
-                    </Col>
-                  </Row>
-                </div>
-                <Nav className="ml-auto" navbar>
-                  <NavItem>
-                    <NavLink to="/profile-page" tag={Link}>
-                    Profile
-                  </NavLink>
-                  </NavItem>
-                  <NavItem>
-                     <NavLink to="/login" tag={Link}>
-                    Login
-                  </NavLink>
-                  </NavItem>
-                  <NavItem>
-                   <NavLink to="/register" tag={Link}>
-                    Register
-                  </NavLink>
-                  </NavItem>
-                </Nav>
-              </UncontrolledCollapse>
-            </Container>
-*/

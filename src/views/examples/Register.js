@@ -1,5 +1,5 @@
 import React from "react";
-
+import axios from "axios";
 import {
   Button,
   Card,
@@ -18,12 +18,15 @@ import {
 
 import DemoNavbar from "components/Navbars/DemoNavbar.js";
 import SimpleFooter from "components/Footers/SimpleFooter.js";
+import ReactDatetime from "react-datetime";
 
 class Register extends React.Component {
-  componentDidMount() {
+  async componentDidMount() {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     this.refs.main.scrollTop = 0;
+    let response = await axios.get("http://127.0.0.1:8080/country/all");
+    this.setState({ ...this.state, countries: response.data });
   }
 
   state = {
@@ -32,19 +35,78 @@ class Register extends React.Component {
     lastName: "",
     email: "",
     password: "",
-    country: "",
-    city: "",
+    address: "",
+    selectedCountry: "",
+    selectedCity: "",
+    dateOfBirth: "",
+    countries: [],
+    cities: [],
+    isLoaded: false,
   };
 
-  handleSubmit = (event) => {
-    console.log(this.state);
-
+  handleSubmit = async (event) => {
     event.preventDefault();
+    const {
+      username,
+      password,
+      firstName,
+      lastName,
+      email,
+      selectedCountry,
+      selectedCity,
+      address,
+      dateOfBirth,
+    } = this.state;
+
+    let date = dateOfBirth.valueOf();
+
+    const user = {
+      username,
+      password,
+      firstName,
+      lastName,
+      email,
+      address,
+      dateOfBirth: date,
+      country: { id: selectedCountry },
+      city: { id: selectedCity },
+    };
+
+    try {
+      let response = axios.post("http://127.0.0.1:8080/user/register", user);
+      this.props.history.push("/login");
+
+      console.log(user);
+    } catch (e) {
+      console.error(e);
+    }
   };
+
   handleChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value,
     });
+  };
+
+  handleDateChange = (date) => {
+    this.setState({
+      dateOfBirth: date._d,
+    });
+  };
+
+  loadCitiesForSelectedCountry = async () => {
+    const { countries, selectedCountry } = this.state;
+    let countryId;
+    countries.map((el) => (el.id == selectedCountry ? (countryId = el.id) : 0));
+    try {
+      let response = await axios.get(
+        "http://127.0.0.1:8080/city/country-id/" + countryId
+      );
+      this.setState({ ...this.state, cities: response.data, isLoaded: true });
+      console.log(this.state);
+    } catch (e) {
+      console.error(e);
+    }
   };
   render() {
     const {
@@ -53,8 +115,13 @@ class Register extends React.Component {
       firstName,
       lastName,
       email,
-      city,
-      country,
+      countries,
+      selectedCountry,
+      cities,
+      address,
+      selectedCity,
+      dateOfBirth,
+      isLoaded,
     } = this.state;
     return (
       <>
@@ -97,6 +164,7 @@ class Register extends React.Component {
                               name="firstName"
                               onChange={this.handleChange}
                               value={firstName}
+                              required
                             />
                           </InputGroup>
                         </FormGroup>
@@ -113,6 +181,25 @@ class Register extends React.Component {
                               name="lastName"
                               onChange={this.handleChange}
                               value={lastName}
+                              required
+                            />
+                          </InputGroup>
+                        </FormGroup>
+                        <FormGroup>
+                          <InputGroup>
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText>
+                                <i className="ni ni-calendar-grid-58" />
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <ReactDatetime
+                              inputProps={{
+                                placeholder: "Date of birth",
+                              }}
+                              timeFormat={false}
+                              value={dateOfBirth}
+                              onChange={this.handleDateChange}
+                              required
                             />
                           </InputGroup>
                         </FormGroup>
@@ -129,6 +216,7 @@ class Register extends React.Component {
                               name="username"
                               onChange={this.handleChange}
                               value={username}
+                              required
                             />
                           </InputGroup>
                         </FormGroup>
@@ -145,6 +233,7 @@ class Register extends React.Component {
                               name="email"
                               onChange={this.handleChange}
                               value={email}
+                              required
                             />
                           </InputGroup>
                         </FormGroup>
@@ -162,41 +251,105 @@ class Register extends React.Component {
                               name="password"
                               onChange={this.handleChange}
                               value={password}
+                              required
                             />
                           </InputGroup>
+                          <div className="text-muted font-italic">
+                            <small>
+                              password strength:{" "}
+                              {password.length >= 8 ? (
+                                <span className="text-success font-weight-700">
+                                  strong
+                                </span>
+                              ) : (
+                                <span className="text-danger font-weight-700">
+                                  weak
+                                </span>
+                              )}
+                            </small>
+                          </div>
                         </FormGroup>
 
-                        <div className="text-muted font-italic">
-                          <small>
-                            password strength:{" "}
-                            {password.length >= 8 ? (
-                              <span className="text-success font-weight-700">
-                                strong
-                              </span>
-                            ) : (
-                              <span className="text-danger font-weight-700">
-                                weak
-                              </span>
-                            )}
-                          </small>
-                        </div>
                         <FormGroup>
                           <InputGroup className="input-group-alternative mb-3">
                             <Input
                               type="select"
-                              name="country"
-                              id="country"
-                              value={country}
+                              name="selectedCountry"
+                              id="selectedCountry"
+                              value={selectedCountry}
                               onChange={this.handleChange}
                               required
                             >
                               <option value="">Select country</option>
-                              <option value="Bosnia and Herzegovina">
-                                Bosnia and Herzegovina
-                              </option>
-                              <option value="Croatia">Croatia</option>
-                              <option value="Serbia">Serbia</option>
+                              {countries.map((el) => (
+                                <option key={el.key} value={el.id}>
+                                  {el.name}
+                                </option>
+                              ))}
                             </Input>
+                          </InputGroup>
+                        </FormGroup>
+                        {selectedCountry && !isLoaded ? (
+                          this.loadCitiesForSelectedCountry() && (
+                            <FormGroup>
+                              <InputGroup className="input-group-alternative mb-3">
+                                <Input
+                                  type="select"
+                                  name="selectedCity"
+                                  id="selectedCity"
+                                  value={selectedCity}
+                                  onChange={this.handleChange}
+                                  required
+                                >
+                                  <option value="">Select city</option>
+                                  {cities.length != 0 &&
+                                    cities.map((el) => (
+                                      <option key={el.key} value={el.id}>
+                                        {el.name}
+                                      </option>
+                                    ))}
+                                </Input>
+                              </InputGroup>
+                            </FormGroup>
+                          )
+                        ) : (
+                          <FormGroup>
+                            <InputGroup className="input-group-alternative mb-3">
+                              <Input
+                                type="select"
+                                name="selectedCity"
+                                id="selectedCity"
+                                value={selectedCity}
+                                onChange={this.handleChange}
+                                required
+                              >
+                                <option value="">Select city</option>
+                                {cities.length != 0 &&
+                                  cities.map((el) => (
+                                    <option key={el.key} value={el.id}>
+                                      {el.name}
+                                    </option>
+                                  ))}
+                              </Input>
+                            </InputGroup>
+                          </FormGroup>
+                        )}
+
+                        <FormGroup>
+                          <InputGroup className="input-group-alternative mb-3">
+                            <InputGroupAddon addonType="prepend">
+                              <InputGroupText>
+                                <i className="ni ni-hat-3" />
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              placeholder="Address"
+                              type="text"
+                              name="address"
+                              onChange={this.handleChange}
+                              value={address}
+                              required
+                            />
                           </InputGroup>
                         </FormGroup>
 

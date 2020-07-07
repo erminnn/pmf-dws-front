@@ -1,39 +1,402 @@
-/*!
-
-=========================================================
-* Argon Design System React - v1.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-design-system-react
-* Copyright 2020 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-design-system-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 import React from "react";
-
+import axios from "axios";
+import moment from "moment";
+import ReactDatetime from "react-datetime";
 // reactstrap components
-import { Button, Card, Container, Row, Col } from "reactstrap";
+import {
+  Button,
+  Card,
+  Container,
+  Row,
+  Col,
+  Modal,
+  FormGroup,
+  Label,
+  Input,
+  Form,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupText,
+  CardBody,
+  CustomInput,
+} from "reactstrap";
 
-// core components
 import DemoNavbar from "components/Navbars/DemoNavbar.js";
 import SimpleFooter from "components/Footers/SimpleFooter.js";
 
 class Profile extends React.Component {
-  componentDidMount() {
+  async componentDidMount() {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     this.refs.main.scrollTop = 0;
+    const token = "Bearer " + localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    const config = {
+      headers: {
+        authorization: `${token}`,
+      },
+    };
+    const response = await axios.get(
+      "http://127.0.0.1:8080/user/findByUsername/" + username,
+      config
+    );
+    const {
+      firstName,
+      lastName,
+      profileImage,
+      country,
+      city,
+      dateOfBirth,
+      email,
+      id,
+    } = response.data;
+
+    localStorage.setItem("user_id", id);
+
+    const serviceTypes = await axios.get(
+      "http://localhost:8080/service-type/all",
+      config
+    );
+
+    const age = this.getAge(dateOfBirth);
+    this.setState({
+      ...this.state,
+      profileImage: profileImage,
+      firstName: firstName,
+      lastName: lastName,
+      age: age,
+      country: country.name,
+      city: city.name,
+      email: email,
+      serviceTypesFromDatabase: serviceTypes.data,
+    });
   }
+
+  getAge = (dateOfBirth) => {
+    let startDate = new Date(dateOfBirth);
+    let endDate = new Date();
+
+    const age = moment.duration(endDate - startDate).years();
+    return age;
+  };
+
+  state = {
+    profileImage: null,
+    modalEditProfilePicture: false,
+    modalOfferService: false,
+    selectedProfileImage: null,
+    age: 0,
+    firstName: "",
+    lastName: "",
+    country: "",
+    city: "",
+    email: "",
+    serviceTypesFromDatabase: [],
+    serviceType: 0,
+    serviceDescription: "",
+    serviceFromDate: "",
+    serviceToDate: "",
+    serviceMaxPerson: "",
+  };
+
+  toggleModal = (event) => {
+    let modalName = event.target.name;
+
+    this.setState({
+      [event.target.name]: !this.state[modalName],
+    });
+  };
+
+  fileSelectedHandler = (event) => {
+    this.setState({
+      ...this.state,
+      selectedProfileImage: event.target.files[0],
+    });
+  };
+
+  handleChangeServiceDateFrom = (date) => {
+    console.log(this.state);
+
+    this.setState({ ...this.state, serviceFromDate: date._d });
+  };
+
+  handleChangeServiceDateTo = (date) => {
+    this.setState({ ...this.state, serviceToDate: date._d });
+  };
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  uploadProfileImage = async () => {
+    const fd = new FormData();
+    fd.append("file", this.state.selectedProfileImage);
+    const token = "Bearer " + localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    const config = {
+      headers: {
+        authorization: `${token}`,
+      },
+    };
+    let editImagePost = await axios.post(
+      "http://127.0.0.1:8080/user/profile/" + username + "/edit-profile-image",
+      fd,
+      config
+    );
+    this.setState({ ...this.state, modalIsOpen: !this.state.modalIsOpen });
+    window.location.reload();
+  };
+
+  saveOfferedService = async () => {
+    const {
+      serviceType,
+      serviceDescription,
+      serviceMaxPerson,
+      serviceFromDate,
+      serviceToDate,
+      modalOfferService,
+    } = this.state;
+
+    const serviceDateFrom = serviceFromDate.valueOf();
+    const serviceDateTo = serviceToDate.valueOf();
+    const user = localStorage.getItem("user_id");
+    const service = {
+      user: {
+        id: user,
+      },
+      serviceType: {
+        id: serviceType,
+      },
+      description: serviceDescription,
+      maxPerson: serviceMaxPerson,
+      fromDate: serviceDateFrom,
+      toDate: serviceDateTo,
+    };
+    const token = "Bearer " + localStorage.getItem("token");
+    const config = {
+      headers: {
+        authorization: `${token}`,
+      },
+    };
+    let response = await axios.post(
+      "http://localhost:8080/user-offer-service-type/add",
+      service,
+      config
+    );
+    console.log(response);
+
+    this.setState({
+      ...this.state,
+      modalOfferService: !this.state.modalOfferService,
+      serviceType: 0,
+      serviceDescription: "",
+      serviceFromDate: "",
+      serviceToDate: "",
+      serviceMaxPerson: "",
+    });
+  };
+
   render() {
+    const {
+      firstName,
+      lastName,
+      profileImage,
+      country,
+      city,
+      age,
+      email,
+      serviceDescription,
+      serviceFromDate,
+      serviceMaxPerson,
+      serviceType,
+      serviceToDate,
+      serviceTypesFromDatabase,
+    } = this.state;
     return (
       <>
+        <Modal
+          className="modal-dialog-centered"
+          isOpen={this.state.modalEditProfilePicture}
+        >
+          <div className="modal-header">
+            <h6 className="modal-title" id="modal-title-default">
+              Add new profile image
+            </h6>
+            <button
+              aria-label="Close"
+              className="close"
+              name="modalEditProfilePicture"
+              data-dismiss="modal"
+              type="button"
+              onClick={this.toggleModal}
+            >
+              ×
+            </button>
+          </div>
+          <div className="modal-body">
+            <FormGroup>
+              <Label for="exampleFile">File</Label>
+
+              <CustomInput
+                type="file"
+                id="exampleFile"
+                name="file"
+                onChange={this.fileSelectedHandler}
+              />
+            </FormGroup>
+          </div>
+          <div className="modal-footer">
+            <Button
+              color="primary"
+              type="button"
+              onClick={this.uploadProfileImage}
+            >
+              Save changes
+            </Button>
+            <Button
+              className="ml-auto"
+              color="link"
+              data-dismiss="modal"
+              type="button"
+              name="modalEditProfilePicture"
+              onClick={this.toggleModal}
+            >
+              Close
+            </Button>
+          </div>
+        </Modal>
+
+        <Modal
+          className="modal-dialog-centered"
+          size="sm"
+          isOpen={this.state.modalOfferService}
+        >
+          <div className="modal-header">
+            <h5 className="modal-title" id="modal-title-default">
+              Offer service
+            </h5>
+            <button
+              aria-label="Close"
+              className="close"
+              name="modalOfferService"
+              data-dismiss="modal"
+              type="button"
+              onClick={this.toggleModal}
+            >
+              ×
+            </button>
+          </div>
+          <div className="modal-body p-0">
+            <Card className="bg-secondary shadow border-0">
+              <CardBody className="px-lg-5 py-lg-5">
+                <Form role="form">
+                  <FormGroup>
+                    <InputGroup className="input-group-alternative mb-3">
+                      <Input
+                        type="select"
+                        name="serviceType"
+                        id="serviceType"
+                        value={this.state.serviceType}
+                        onChange={this.handleChange}
+                        required
+                      >
+                        <option value="">Select service type</option>
+                        {serviceTypesFromDatabase.map((el) => (
+                          <option key={el.key} value={el.id}>
+                            {el.name}
+                          </option>
+                        ))}
+                      </Input>
+                    </InputGroup>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="ni ni-calendar-grid-58" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <ReactDatetime
+                        inputProps={{
+                          placeholder: "Offer service from date",
+                        }}
+                        timeFormat={false}
+                        value={serviceFromDate}
+                        onChange={this.handleChangeServiceDateFrom}
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="ni ni-calendar-grid-58" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <ReactDatetime
+                        inputProps={{
+                          placeholder: "Offer service to date",
+                        }}
+                        timeFormat={false}
+                        value={serviceToDate}
+                        onChange={this.handleChangeServiceDateTo}
+                      />
+                    </InputGroup>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <InputGroup className="input-group-alternative">
+                      <Input
+                        placeholder="Description"
+                        type="textarea"
+                        value={serviceDescription}
+                        onChange={this.handleChange}
+                        name="serviceDescription"
+                      />
+                    </InputGroup>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <InputGroup className="input-group-alternative">
+                      <Input
+                        placeholder="Max persons for service"
+                        type="text"
+                        value={serviceMaxPerson}
+                        onChange={this.handleChange}
+                        name="serviceMaxPerson"
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                </Form>
+              </CardBody>
+            </Card>
+            <div className="modal-footer">
+              <Button
+                color="primary"
+                type="button"
+                onClick={this.saveOfferedService}
+              >
+                Offer
+              </Button>
+              <Button
+                className="ml-auto"
+                color="link"
+                data-dismiss="modal"
+                type="button"
+                name="modalOfferService"
+                onClick={this.toggleModal}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
         <DemoNavbar />
+
         <main className="profile-page" ref="main">
           <section className="section-profile-cover section-shaped my-0">
             {/* Circles background */}
@@ -77,7 +440,7 @@ class Profile extends React.Component {
                           <img
                             alt="..."
                             className="rounded-circle"
-                            src={require("assets/img/theme/team-4-800x800.jpg")}
+                            src={"data:image/png;base64," + profileImage}
                           />
                         </a>
                       </div>
@@ -90,20 +453,21 @@ class Profile extends React.Component {
                         <Button
                           className="mr-4"
                           color="info"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
+                          name="modalEditProfilePicture"
+                          onClick={this.toggleModal}
                           size="sm"
                         >
-                          Connect
+                          Add new image
                         </Button>
+
                         <Button
                           className="float-right"
                           color="default"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
+                          name="modalOfferService"
+                          onClick={this.toggleModal}
                           size="sm"
                         >
-                          Message
+                          Offer a service
                         </Button>
                       </div>
                     </Col>
@@ -126,16 +490,16 @@ class Profile extends React.Component {
                   </Row>
                   <div className="text-center mt-5">
                     <h3>
-                      Jessica Jones{" "}
-                      <span className="font-weight-light">, 27</span>
+                      {firstName + " " + lastName}
+                      <span className="font-weight-light">, {age}</span>
                     </h3>
                     <div className="h6 font-weight-300">
                       <i className="ni location_pin mr-2" />
-                      Bucharest, Romania
+                      {city}, {country}
                     </div>
                     <div className="h6 mt-4">
                       <i className="ni business_briefcase-24 mr-2" />
-                      Solution Manager - Creative Tim Officer
+                      {email}
                     </div>
                     <div>
                       <i className="ni education_hat mr-2" />
@@ -152,9 +516,6 @@ class Profile extends React.Component {
                           giving it a warm, intimate feel with a solid groove
                           structure. An artist of considerable range.
                         </p>
-                        <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                          Show more
-                        </a>
                       </Col>
                     </Row>
                   </div>

@@ -22,10 +22,11 @@
     "not op_mini all"
   ],
   "dependencies": {
+    "axios": "^0.19.2",
     "bootstrap": "4.5.0",
     "classnames": "2.2.6",
     "headroom.js": "0.11.0",
-    "moment": "2.27.0",
+    "moment": "^2.27.0",
     "node-sass": "4.14.1",
     "nouislider": "14.6.0",
     "react": "16.13.1",
