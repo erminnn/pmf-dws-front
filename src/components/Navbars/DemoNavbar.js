@@ -62,6 +62,21 @@ class DemoNavbar extends React.Component {
                   {this.isAuthenticated() ? (
                     <>
                       <NavItem>
+                        <NavLink to="/offer-services" tag={Link}>
+                          Offers
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
+                        <NavLink to="/inspire" tag={Link}>
+                          Inspire me
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
+                        <NavLink to="/country-review" tag={Link}>
+                          Country Review
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
                         <NavLink to="/profile-page" tag={Link}>
                           Profile
                         </NavLink>
@@ -72,6 +87,16 @@ class DemoNavbar extends React.Component {
                     </>
                   ) : (
                     <>
+                      <NavItem>
+                        <NavLink to="/offer-services" tag={Link}>
+                          Offers
+                        </NavLink>
+                      </NavItem>
+                      <NavItem>
+                        <NavLink to="/inspire" tag={Link}>
+                          Inspire me
+                        </NavLink>
+                      </NavItem>
                       <NavItem>
                         <NavLink to="/login" tag={Link}>
                           Login

@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-// reactstrap components
 import {
   Button,
   Card,
@@ -19,7 +18,6 @@ import {
   NavLink,
 } from "reactstrap";
 
-// core components
 import DemoNavbar from "components/Navbars/DemoNavbar.js";
 import SimpleFooter from "components/Footers/SimpleFooter.js";
 
@@ -41,6 +39,21 @@ class Login extends React.Component {
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("username", username);
+
+      const token = "Bearer " + response.data.token;
+
+      const config = {
+        headers: {
+          authorization: `${token}`,
+        },
+      };
+
+      let responseId = await axios.get(
+        "http://127.0.0.1:8080/user/" + username,
+        config
+      );
+
+      localStorage.setItem("user_id", responseId.data);
       this.props.history.push("/");
     } catch (e) {
       console.error(e);

@@ -24,11 +24,15 @@ import "assets/vendor/font-awesome/css/font-awesome.min.css";
 import "assets/scss/argon-design-system-react.scss?v1.1.0";
 
 import Index from "views/Index.js";
-import Landing from "views/examples/Landing.js";
 import Login from "views/examples/Login.js";
 import Profile from "views/examples/Profile.js";
 import Register from "views/examples/Register.js";
-import Hero from "./views/IndexSections/Hero";
+import EditProfile from "views/examples/EditProfile.js";
+import AddOrEditOfferService from "views/examples/AddOrEditOfferService.js";
+import UserCountryReview from "views/examples/UserCountryReview.js";
+import AddOrEditUserCountryReview from "views/examples/AddOrEditUserCountryReview.js";
+import InspireMe from "views/examples/InspireMe.js";
+import UserOfferServices from "views/examples/UserOfferServices.js";
 
 ReactDOM.render(
   <BrowserRouter>
@@ -37,6 +41,20 @@ ReactDOM.render(
       <Route exact path="/login" component={Login} />
       <Route exact path="/profile-page" exact component={Profile} />
       <Route exact path="/register" component={Register} />
+      <Route exact path="/edit-profile" component={EditProfile} />
+      <Route
+        exact
+        path="/offer-service/:id/:action"
+        component={AddOrEditOfferService}
+      />
+      <Route exact path="/country-review" component={UserCountryReview} />
+      <Route
+        exact
+        path="/country-review/:id/:action"
+        component={AddOrEditUserCountryReview}
+      />
+      <Route exact path="/inspire" component={InspireMe} />
+      <Route exact path="/offer-services" component={UserOfferServices} />
       <Redirect to="/" />
     </Switch>
   </BrowserRouter>,

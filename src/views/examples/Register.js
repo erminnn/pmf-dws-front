@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import {
   Button,
   Card,
@@ -14,6 +15,7 @@ import {
   Container,
   Row,
   Col,
+  NavLink,
 } from "reactstrap";
 
 import DemoNavbar from "components/Navbars/DemoNavbar.js";
@@ -35,7 +37,6 @@ class Register extends React.Component {
     lastName: "",
     email: "",
     password: "",
-    address: "",
     selectedCountry: "",
     selectedCity: "",
     dateOfBirth: "",
@@ -54,11 +55,8 @@ class Register extends React.Component {
       email,
       selectedCountry,
       selectedCity,
-      address,
       dateOfBirth,
     } = this.state;
-
-    let date = dateOfBirth.valueOf();
 
     const user = {
       username,
@@ -66,8 +64,7 @@ class Register extends React.Component {
       firstName,
       lastName,
       email,
-      address,
-      dateOfBirth: date,
+      dateOfBirth: dateOfBirth.valueOf(),
       country: { id: selectedCountry },
       city: { id: selectedCity },
     };
@@ -94,15 +91,17 @@ class Register extends React.Component {
     });
   };
 
-  loadCitiesForSelectedCountry = async () => {
-    const { countries, selectedCountry } = this.state;
-    let countryId;
-    countries.map((el) => (el.id == selectedCountry ? (countryId = el.id) : 0));
+  loadCitiesForSelectedCountry = async (event) => {
+    let countryId = event.target.value;
+    await this.setState({
+      [event.target.name]: event.target.value,
+    });
     try {
       let response = await axios.get(
         "http://127.0.0.1:8080/city/country-id/" + countryId
       );
-      this.setState({ ...this.state, cities: response.data, isLoaded: true });
+
+      this.setState({ ...this.state, cities: response.data });
       console.log(this.state);
     } catch (e) {
       console.error(e);
@@ -118,7 +117,6 @@ class Register extends React.Component {
       countries,
       selectedCountry,
       cities,
-      address,
       selectedCity,
       dateOfBirth,
       isLoaded,
@@ -199,7 +197,6 @@ class Register extends React.Component {
                               timeFormat={false}
                               value={dateOfBirth}
                               onChange={this.handleDateChange}
-                              required
                             />
                           </InputGroup>
                         </FormGroup>
@@ -277,7 +274,7 @@ class Register extends React.Component {
                               name="selectedCountry"
                               id="selectedCountry"
                               value={selectedCountry}
-                              onChange={this.handleChange}
+                              onChange={this.loadCitiesForSelectedCountry}
                               required
                             >
                               <option value="">Select country</option>
@@ -290,28 +287,26 @@ class Register extends React.Component {
                           </InputGroup>
                         </FormGroup>
                         {selectedCountry && !isLoaded ? (
-                          this.loadCitiesForSelectedCountry() && (
-                            <FormGroup>
-                              <InputGroup className="input-group-alternative mb-3">
-                                <Input
-                                  type="select"
-                                  name="selectedCity"
-                                  id="selectedCity"
-                                  value={selectedCity}
-                                  onChange={this.handleChange}
-                                  required
-                                >
-                                  <option value="">Select city</option>
-                                  {cities.length != 0 &&
-                                    cities.map((el) => (
-                                      <option key={el.key} value={el.id}>
-                                        {el.name}
-                                      </option>
-                                    ))}
-                                </Input>
-                              </InputGroup>
-                            </FormGroup>
-                          )
+                          <FormGroup>
+                            <InputGroup className="input-group-alternative mb-3">
+                              <Input
+                                type="select"
+                                name="selectedCity"
+                                id="selectedCity"
+                                value={selectedCity}
+                                onChange={this.handleChange}
+                                required
+                              >
+                                <option value="">Select city</option>
+                                {cities.length != 0 &&
+                                  cities.map((el) => (
+                                    <option key={el.key} value={el.id}>
+                                      {el.name}
+                                    </option>
+                                  ))}
+                              </Input>
+                            </InputGroup>
+                          </FormGroup>
                         ) : (
                           <FormGroup>
                             <InputGroup className="input-group-alternative mb-3">
@@ -335,24 +330,6 @@ class Register extends React.Component {
                           </FormGroup>
                         )}
 
-                        <FormGroup>
-                          <InputGroup className="input-group-alternative mb-3">
-                            <InputGroupAddon addonType="prepend">
-                              <InputGroupText>
-                                <i className="ni ni-hat-3" />
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              placeholder="Address"
-                              type="text"
-                              name="address"
-                              onChange={this.handleChange}
-                              value={address}
-                              required
-                            />
-                          </InputGroup>
-                        </FormGroup>
-
                         <div className="text-center">
                           <Button
                             className="mt-4"
@@ -365,6 +342,15 @@ class Register extends React.Component {
                       </Form>
                     </CardBody>
                   </Card>
+                  <Row className="mt-3">
+                    <Col className="text-right" xs="12">
+                      <NavLink to="/login" tag={Link}>
+                        <small className="text-light">
+                          Already have an account? Sign in
+                        </small>
+                      </NavLink>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
             </Container>
